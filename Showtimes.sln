@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Showtimes.Tests", "Showtime
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Showtimes.Domain", "Showtimes.Domain\Showtimes.Domain.csproj", "{17281524-6FC4-401D-9C6E-418F76989F49}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Showtimes.Domain.Tests", "Showtimes.Domain.Tests\Showtimes.Domain.Tests.csproj", "{BD375BC7-F0D9-4FC7-ACBC-44936C358D51}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{17281524-6FC4-401D-9C6E-418F76989F49}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{17281524-6FC4-401D-9C6E-418F76989F49}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{17281524-6FC4-401D-9C6E-418F76989F49}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD375BC7-F0D9-4FC7-ACBC-44936C358D51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD375BC7-F0D9-4FC7-ACBC-44936C358D51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD375BC7-F0D9-4FC7-ACBC-44936C358D51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD375BC7-F0D9-4FC7-ACBC-44936C358D51}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Showtimes.Domain
 {
-    public public class Movie
+    public class Movie
     {
         public int MovieId { get; set; }
         public string Title { get; set; }

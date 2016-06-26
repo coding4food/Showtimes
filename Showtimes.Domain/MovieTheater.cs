@@ -9,5 +9,6 @@ namespace Showtimes.Domain
     public class MovieTheater
     {
         public int MovieTheaterId { get; set; }
+        public string Name { get; set; }
     }
 }

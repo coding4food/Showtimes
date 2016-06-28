@@ -14,32 +14,9 @@ namespace Showtimes.Domain.Tests
         [TestMethod]
         public async Task ScheduleShowtime_Stores_Showtimes()
         {
-            var uow = new UnitOfWork();
-
-            uow.MovieTheatres.Insert(new MovieTheater { Name = "qwerty" });
-            uow.Movies.Insert(new Movie { Title = "asdfgh" });
-
-            await uow.SaveAsync();
-
-            var theater = (await uow.MovieTheatres.GetAllAsync()).First();
-            var movie = (await uow.Movies.GetAllAsync()).First();
-            var sessionTimes = new[]
-            {
-                DateTime.Today.AddHours(10),
-                DateTime.Today.AddHours(12),
-                DateTime.Today.AddHours(14),
-            };
-
-            await (new ShowtimesSchedulingService(uow)).ScheduleShowtimes(theater.MovieTheaterId, movie.MovieId, sessionTimes);
-
-            Assert.AreEqual(sessionTimes.Length, (await uow.Showtimes.GetAllAsync()).Count());
-        }
-
-        [TestMethod]
-        public async Task ShowtimesForADate_Returns_Showtimes_For_A_Date()
-        {
+            var movie = new Movie { MovieId = 10, Title = "asdfgh" };
+            var theater = new MovieTheater { MovieTheaterId = 15, Name = "qwerty" };
             var date = DateTime.Today;
-
             var sessionTimes = new[]
             {
                 date.AddHours(10),
@@ -47,25 +24,34 @@ namespace Showtimes.Domain.Tests
                 date.AddHours(14),
             };
 
-            var uow = new UnitOfWork();
-
-            uow.MovieTheatres.Insert(new MovieTheater { Name = "qwerty" });
-            uow.Movies.Insert(new Movie { Title = "asdfgh" });
-
-            await uow.SaveAsync();
-
-            var theater = (await uow.MovieTheatres.GetAllAsync()).First();
-            var movie = (await uow.Movies.GetAllAsync()).First();
+            var mockMovies = Mock.Of<IRepository<Movie>>(r => r.FindAsync(movie.MovieId) == Task.FromResult<Movie>(movie));
+            var mockTheatres = Mock.Of<IRepository<MovieTheater>>(r => r.FindAsync(theater.MovieTheaterId) == Task.FromResult<MovieTheater>(theater));
+            var mockShowtimes = Mock.Of<IShowtimesRepository>();
+            var uow = Mock.Of<IUnitOfWork>(u => u.Movies == mockMovies && u.MovieTheatres == mockTheatres && u.Showtimes == mockShowtimes);
 
             var sut = new ShowtimesSchedulingService(uow);
 
             await sut.ScheduleShowtimes(theater.MovieTheaterId, movie.MovieId, sessionTimes);
 
-            var actual = await sut.ShowtimesForADate(date);
+            Mock.Get(mockShowtimes).Verify(r => r.Insert(It.Is<Showtimes>(s =>
+                s.MovieTheaterId == theater.MovieTheaterId &&
+                s.MovieId == movie.MovieId &&
+                sessionTimes.Contains(s.SessionTime))), Times.Exactly(3));
+        }
 
-            Assert.IsTrue(actual.Any());
-            Assert.AreEqual(sessionTimes.Length, actual.Count());
-            CollectionAssert.AreEquivalent(sessionTimes, actual.Select(s => s.SessionTime).ToArray());
+        [TestMethod]
+        public async Task ShowtimesForADate_Returns_Showtimes_For_A_Date()
+        {
+            var date = DateTime.Today;
+
+            var mockShowtimes = Mock.Of<IShowtimesRepository>();
+            var uow = Mock.Of<IUnitOfWork>(u => u.Showtimes == mockShowtimes);
+
+            var sut = new ShowtimesSchedulingService(uow);
+
+            await sut.ShowtimesForADate(date);
+
+            Mock.Get(mockShowtimes).Verify(r => r.GetAllByDateAsync(date), Times.Once);
         }
 
         [TestMethod]

@@ -28,7 +28,7 @@ namespace Showtimes.Domain.Tests
                 DateTime.Today.AddHours(14),
             };
 
-            await ShowtimesSchedulingService.ScheduleShowtimes(theater.MovieTheaterId, movie.MovieId, sessionTimes);
+            await (new ShowtimesSchedulingService(uow)).ScheduleShowtimes(theater.MovieTheaterId, movie.MovieId, sessionTimes);
 
             Assert.AreEqual(sessionTimes.Length, (await uow.Showtimes.GetAllAsync()).Count());
         }
@@ -55,9 +55,11 @@ namespace Showtimes.Domain.Tests
             var theater = (await uow.MovieTheatres.GetAllAsync()).First();
             var movie = (await uow.Movies.GetAllAsync()).First();
 
-            await ShowtimesSchedulingService.ScheduleShowtimes(theater.MovieTheaterId, movie.MovieId, sessionTimes);
+            var sut = new ShowtimesSchedulingService(uow);
 
-            var actual = await ShowtimesSchedulingService.ShowtimesForADate(date);
+            await sut.ScheduleShowtimes(theater.MovieTheaterId, movie.MovieId, sessionTimes);
+
+            var actual = await sut.ShowtimesForADate(date);
 
             Assert.IsTrue(actual.Any());
             Assert.AreEqual(sessionTimes.Length, actual.Count());

@@ -19,7 +19,7 @@ namespace Showtimes.Domain
         // ??? Needed for ToArrayAsync to work
         private Showtimes() { }
 
-        internal Showtimes(int movieTheaterId, int movieId, DateTime sessionTime)
+        public Showtimes(int movieTheaterId, int movieId, DateTime sessionTime)
         {
             this.MovieTheaterId = movieTheaterId;
             this.MovieId = movieId;

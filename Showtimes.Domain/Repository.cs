@@ -20,6 +20,7 @@ namespace Showtimes.Domain
     public interface IShowtimesRepository: IRepository<Showtimes>
     {
         Task<IEnumerable<Showtimes>> GetAllByDateAsync(DateTime date);
+        Task<IEnumerable<Showtimes>> GetAllByDateAsync(DateTime date, int movieTheaterId, int movieId);
     }
 
     public interface IUnitOfWork
@@ -87,6 +88,17 @@ namespace Showtimes.Domain
 
             var showtimes = await this.DbSet
                 .Where(s => s.SessionTime >= date.Date && s.SessionTime < endDate)
+                .ToArrayAsync();
+
+            return showtimes;
+        }
+
+        public async Task<IEnumerable<Showtimes>> GetAllByDateAsync(DateTime date, int movieTheaterId, int movieId)
+        {
+            var endDate = date.Date.AddDays(1);
+
+            var showtimes = await this.DbSet
+                .Where(s => s.MovieTheaterId == movieTheaterId && s.MovieId == movieId && s.SessionTime >= date.Date && s.SessionTime < endDate)
                 .ToArrayAsync();
 
             return showtimes;

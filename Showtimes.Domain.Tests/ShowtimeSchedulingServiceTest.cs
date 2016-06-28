@@ -130,5 +130,75 @@ namespace Showtimes.Domain.Tests
                 s.MovieId == movie.MovieId &&
                 s.SessionTime == sessionTimes[4])), Times.Once());
         }
+
+        [TestMethod]
+        public async Task ScheduleShowtime_Removes_Missing_Showtimes_For_A_Date()
+        {
+            var date = DateTime.Today;
+            var oldSessionTimes = new[]
+            {
+                date.AddHours(10),
+                date.AddHours(12),
+                date.AddHours(14)
+            };
+            var newSessionTimes = new[]
+            {
+                date.AddHours(10),
+                date.AddHours(13),
+                date.AddHours(15)
+            };
+
+            Mock.Get(UnitOfWork.Showtimes).Setup(r => r.GetAllByDateAsync(date, theater.MovieTheaterId, movie.MovieId))
+                .Returns(Task.FromResult(oldSessionTimes.Select(t => new Showtimes(theater.MovieTheaterId, movie.MovieId, t))));
+
+            await Sut.ScheduleShowtimes(theater.MovieTheaterId, movie.MovieId, newSessionTimes);
+
+            var mock = Mock.Get(UnitOfWork.Showtimes);
+
+            mock.Verify(r => r.Delete(It.Is<Showtimes>(s =>
+                s.MovieTheaterId == theater.MovieTheaterId &&
+                s.MovieId == movie.MovieId &&
+                s.SessionTime == oldSessionTimes[1])), Times.Once());
+
+            mock.Verify(r => r.Delete(It.Is<Showtimes>(s =>
+                s.MovieTheaterId == theater.MovieTheaterId &&
+                s.MovieId == movie.MovieId &&
+                s.SessionTime == oldSessionTimes[2])), Times.Once());
+        }
+
+        [TestMethod]
+        public async Task ScheduleShowtime_Inserts_New_Showtimes_For_A_Date()
+        {
+            var date = DateTime.Today;
+            var oldSessionTimes = new[]
+            {
+                date.AddHours(10),
+                date.AddHours(12),
+                date.AddHours(14)
+            };
+            var newSessionTimes = new[]
+            {
+                date.AddHours(10),
+                date.AddHours(13),
+                date.AddHours(15)
+            };
+
+            Mock.Get(UnitOfWork.Showtimes).Setup(r => r.GetAllByDateAsync(date, theater.MovieTheaterId, movie.MovieId))
+                .Returns(Task.FromResult(oldSessionTimes.Select(t => new Showtimes(theater.MovieTheaterId, movie.MovieId, t))));
+
+            await Sut.ScheduleShowtimes(theater.MovieTheaterId, movie.MovieId, newSessionTimes);
+
+            var mock = Mock.Get(UnitOfWork.Showtimes);
+
+            mock.Verify(r => r.Insert(It.Is<Showtimes>(s =>
+                s.MovieTheaterId == theater.MovieTheaterId &&
+                s.MovieId == movie.MovieId &&
+                s.SessionTime == newSessionTimes[1])), Times.Once());
+
+            mock.Verify(r => r.Insert(It.Is<Showtimes>(s =>
+                s.MovieTheaterId == theater.MovieTheaterId &&
+                s.MovieId == movie.MovieId &&
+                s.SessionTime == newSessionTimes[2])), Times.Once());
+        }
     }
 }

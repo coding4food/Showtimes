@@ -41,7 +41,22 @@ namespace Showtimes.Domain
                 throw new ArgumentException(nameof(movieTheaterId));
             }
 
-            foreach (var showtime in sessionTimes.Distinct().Select(time => new Showtimes(movieTheaterId, movieId, time)))
+            var newSessionTimes = sessionTimes.Distinct().ToArray();
+
+            var oldShowtimes = await unitOfWork.Showtimes.GetAllByDateAsync(sessionTimes.First().Date, movieTheaterId, movieId);
+
+            foreach (var oldShowtime in oldShowtimes.Where(s => !newSessionTimes.Contains(s.SessionTime)))
+            {
+                unitOfWork.Showtimes.Delete(oldShowtime);
+            }
+
+            var oldSessionTimes = oldShowtimes.Select(s => s.SessionTime).ToArray();
+
+            var newShowtimes = newSessionTimes
+                .Except(oldSessionTimes)
+                .Select(time => new Showtimes(movieTheaterId, movieId, time));
+
+            foreach (var showtime in newShowtimes)
             {
                 this.unitOfWork.Showtimes.Insert(showtime);
             }

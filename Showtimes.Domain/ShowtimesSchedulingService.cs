@@ -25,7 +25,10 @@ namespace Showtimes.Domain
 
         public static Task<IEnumerable<Showtimes>> ShowtimesForADate(DateTime date)
         {
-            return Task.FromResult(Enumerable.Empty<Showtimes>());
+            // Requires Dependency Injection
+            var uow = new UnitOfWork();
+
+            return uow.Showtimes.GetAllByDateAsync(date);
         }
     }
 }

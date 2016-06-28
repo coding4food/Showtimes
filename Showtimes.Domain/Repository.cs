@@ -83,8 +83,10 @@ namespace Showtimes.Domain
 
         public async Task<IEnumerable<Showtimes>> GetAllByDateAsync(DateTime date)
         {
+            var endDate = date.Date.AddDays(1);
+
             var showtimes = await this.DbSet
-                .Where(s => s.SessionTime >= date.Date && s.SessionTime < date.Date.AddDays(1))
+                .Where(s => s.SessionTime >= date.Date && s.SessionTime < endDate)
                 .ToArrayAsync();
 
             return showtimes;

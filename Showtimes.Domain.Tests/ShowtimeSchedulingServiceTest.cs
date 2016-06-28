@@ -13,12 +13,14 @@ namespace Showtimes.Domain.Tests
     {
         private IUnitOfWork UnitOfWork;
         private ShowtimesSchedulingService Sut;
+        private Movie movie = new Movie { MovieId = 10, Title = "asdfgh" };
+        private MovieTheater theater = new MovieTheater { MovieTheaterId = 15, Name = "qwerty" };
 
         [TestInitialize]
         public void Setup()
         {
-            var movies = Mock.Of<IRepository<Movie>>();
-            var theatres = Mock.Of<IRepository<MovieTheater>>();
+            var movies = Mock.Of<IRepository<Movie>>(r => r.FindAsync(movie.MovieId) == Task.FromResult(movie));
+            var theatres = Mock.Of<IRepository<MovieTheater>>(r => r.FindAsync(theater.MovieTheaterId) == Task.FromResult(theater));
             var showtimes = Mock.Of<IShowtimesRepository>();
 
             UnitOfWork = Mock.Of<IUnitOfWork>(u =>
@@ -33,8 +35,6 @@ namespace Showtimes.Domain.Tests
         [TestMethod]
         public async Task ScheduleShowtime_Stores_Showtimes()
         {
-            var movie = new Movie { MovieId = 10, Title = "asdfgh" };
-            var theater = new MovieTheater { MovieTheaterId = 15, Name = "qwerty" };
             var date = DateTime.Today;
             var sessionTimes = new[]
             {
@@ -42,9 +42,6 @@ namespace Showtimes.Domain.Tests
                 date.AddHours(12),
                 date.AddHours(14),
             };
-
-            Mock.Get(UnitOfWork.Movies).Setup(r => r.FindAsync(movie.MovieId)).Returns(Task.FromResult<Movie>(movie));
-            Mock.Get(UnitOfWork.MovieTheatres).Setup(r => r.FindAsync(theater.MovieTheaterId)).Returns(Task.FromResult<MovieTheater>(theater));
 
             await Sut.ScheduleShowtimes(theater.MovieTheaterId, movie.MovieId, sessionTimes);
 
@@ -77,14 +74,10 @@ namespace Showtimes.Domain.Tests
         [TestMethod]
         public void ScheduleShowtime_Throws_For_Invalid_MovieTheaterId()
         {
-            int movieId = 1000;
-
-            Mock.Get(UnitOfWork.Movies).Setup(r => r.FindAsync(movieId))
-                .Returns(Task.FromResult<Movie>(new Movie { MovieId = movieId, Title = "AAA" }));
             Mock.Get(UnitOfWork.MovieTheatres).Setup(r => r.FindAsync(It.IsAny<int>()))
                 .Returns(Task.FromResult<MovieTheater>(null));
 
-            Func<Task> act = async () => await Sut.ScheduleShowtimes(1000, movieId, new[] { DateTime.Now });
+            Func<Task> act = async () => await Sut.ScheduleShowtimes(theater.MovieTheaterId, movie.MovieId, new[] { DateTime.Now });
 
             act.ShouldThrow<ArgumentException>().Where(ex => ex.Message.Contains("movieTheaterId"));
         }
@@ -92,15 +85,7 @@ namespace Showtimes.Domain.Tests
         [TestMethod]
         public void ScheduleShowtime_Throws_For_Null_SessionTimes()
         {
-            int movieId = 1000;
-            int movieTheaterId = 1000;
-
-            Mock.Get(UnitOfWork.Movies).Setup(r => r.FindAsync(movieId))
-                .Returns(Task.FromResult<Movie>(new Movie { MovieId = movieId, Title = "AAA" }));
-            Mock.Get(UnitOfWork.MovieTheatres).Setup(r => r.FindAsync(movieTheaterId))
-                .Returns(Task.FromResult<MovieTheater>(new MovieTheater { MovieTheaterId = movieTheaterId, Name = "BBB" }));
-
-            Func<Task> act = async () => await Sut.ScheduleShowtimes(movieTheaterId, movieId, null);
+            Func<Task> act = async () => await Sut.ScheduleShowtimes(theater.MovieTheaterId, movie.MovieId, null);
 
             act.ShouldThrow<ArgumentNullException>().Where(ex => ex.Message.Contains("sessionTimes"));
         }
@@ -108,17 +93,42 @@ namespace Showtimes.Domain.Tests
         [TestMethod]
         public void ScheduleShowtime_Throws_For_Empty_SessionTimes()
         {
-            int movieId = 1000;
-            int movieTheaterId = 1000;
-
-            Mock.Get(UnitOfWork.Movies).Setup(r => r.FindAsync(movieId))
-                .Returns(Task.FromResult<Movie>(new Movie { MovieId = movieId, Title = "AAA" }));
-            Mock.Get(UnitOfWork.MovieTheatres).Setup(r => r.FindAsync(movieTheaterId))
-                .Returns(Task.FromResult<MovieTheater>(new MovieTheater { MovieTheaterId = movieTheaterId, Name = "BBB" }));
-
-            Func<Task> act = async () => await Sut.ScheduleShowtimes(movieTheaterId, movieId, Enumerable.Empty<DateTime>());
+            Func<Task> act = async () => await Sut.ScheduleShowtimes(theater.MovieTheaterId, movie.MovieId, Enumerable.Empty<DateTime>());
 
             act.ShouldThrow<ArgumentException>().Where(ex => ex.Message.Contains("sessionTimes"));
+        }
+
+        [TestMethod]
+        public async Task ScheduleShowtime_Ignores_Duplicate_Session_Times()
+        {
+            var date = DateTime.Today;
+            var sessionTimes = new[]
+            {
+                date.AddHours(10),
+                date.AddHours(12),
+                date.AddHours(10),
+                date.AddHours(12),
+                date.AddHours(14)
+            };
+
+            await Sut.ScheduleShowtimes(theater.MovieTheaterId, movie.MovieId, sessionTimes);
+
+            var mock = Mock.Get(UnitOfWork.Showtimes);
+
+            mock.Verify(r => r.Insert(It.Is<Showtimes>(s =>
+                s.MovieTheaterId == theater.MovieTheaterId &&
+                s.MovieId == movie.MovieId &&
+                s.SessionTime == sessionTimes[0])), Times.Once());
+
+            mock.Verify(r => r.Insert(It.Is<Showtimes>(s =>
+                s.MovieTheaterId == theater.MovieTheaterId &&
+                s.MovieId == movie.MovieId &&
+                s.SessionTime == sessionTimes[1])), Times.Once());
+
+            mock.Verify(r => r.Insert(It.Is<Showtimes>(s =>
+                s.MovieTheaterId == theater.MovieTheaterId &&
+                s.MovieId == movie.MovieId &&
+                s.SessionTime == sessionTimes[4])), Times.Once());
         }
     }
 }

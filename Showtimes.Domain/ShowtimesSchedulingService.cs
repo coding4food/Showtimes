@@ -41,7 +41,7 @@ namespace Showtimes.Domain
                 throw new ArgumentException(nameof(movieTheaterId));
             }
 
-            foreach (var showtime in sessionTimes.Select(time => new Showtimes(movieTheaterId, movieId, time)))
+            foreach (var showtime in sessionTimes.Distinct().Select(time => new Showtimes(movieTheaterId, movieId, time)))
             {
                 this.unitOfWork.Showtimes.Insert(showtime);
             }

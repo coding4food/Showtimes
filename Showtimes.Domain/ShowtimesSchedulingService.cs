@@ -8,14 +8,24 @@ namespace Showtimes.Domain
 {
     public static class ShowtimesSchedulingService
     {
-        public static void ScheduleShowtimes(int movieTheaterId, int movieId, IEnumerable<DateTime> sessionTimes)
+        public static Task ScheduleShowtimes(int movieTheaterId, int movieId, IEnumerable<DateTime> sessionTimes)
         {
             // TODO add some validation
+
+            // HIDDEN DEPENDENCY
+            var uow = new UnitOfWork();
+
+            foreach (var showtime in sessionTimes.Select(time => new Showtimes(movieTheaterId, movieId, time)))
+            {
+                uow.Showtimes.Insert(showtime);
+            }
+
+            return uow.SaveAsync();
         }
 
-        public static IEnumerable<Showtimes> ShowtimesForADate(DateTime date)
+        public static Task<IEnumerable<Showtimes>> ShowtimesForADate(DateTime date)
         {
-            return Enumerable.Empty<Showtimes>();
+            return Task.FromResult(Enumerable.Empty<Showtimes>());
         }
     }
 }

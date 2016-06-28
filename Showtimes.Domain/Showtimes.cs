@@ -16,6 +16,9 @@ namespace Showtimes.Domain
         public virtual MovieTheater Theater { get; private set; }
         public virtual Movie Movie { get; private set; }
 
+        // ??? Needed for ToArrayAsync to work
+        private Showtimes() { }
+
         internal Showtimes(int movieTheaterId, int movieId, DateTime sessionTime)
         {
             this.MovieTheaterId = movieTheaterId;

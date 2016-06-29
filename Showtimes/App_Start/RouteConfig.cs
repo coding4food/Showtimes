@@ -16,7 +16,7 @@ namespace Showtimes
             routes.MapRoute(
                 name: "Schedule",
                 url: "Schedule/{action}/{movieTheaterId}/{movieId}/{date}",
-                defaults: new { controller = "Schedule", date = DateTime.Today }
+                defaults: new { controller = "Schedule", action = "Index" }
             );
 
             routes.MapRoute(

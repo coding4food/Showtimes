@@ -56,9 +56,40 @@ namespace Showtimes.Controllers
         }
 
         // GET: Schedule/Edit/5
-        public ActionResult Edit(int id)
+        public async Task<ActionResult> Edit(int movieTheaterId, int movieId, DateTime? date)
         {
-            return View();
+            // TODO ??? add validation for movie and theater (should exist)
+
+            var d = date ?? DateTime.Today;
+
+            var showtimes = await unitOfWork.Showtimes.GetAllByDateAsync(d, movieTheaterId, movieId);
+            var theatres = await unitOfWork.MovieTheatres.GetAllAsync();
+            var movies = await unitOfWork.Movies.GetAllAsync();
+
+            ViewBag.Movies = new SelectList(
+                items: movies,
+                dataTextField: "Title",
+                dataValueField: "MovieId",
+                selectedValue: movieId
+            );
+
+            ViewBag.MovieTheaters = new SelectList(
+                items: theatres,
+                dataTextField: "Name",
+                dataValueField: "MovieTheaterId",
+                selectedValue: movieTheaterId
+            );
+
+            var model = new ShowtimesEdit
+            {
+                MovieTheaterId = movieTheaterId,
+                MovieId = movieId,
+                Date = d,
+                SessionTimes = showtimes.Select(_ => _.SessionTime.TimeOfDay),
+                SessionTimesStr = string.Join("\n", showtimes.Select(_ => _.SessionTime.TimeOfDay.ToString("hh\\:mm")))
+            };
+
+            return View(model);
         }
 
         // POST: Schedule/Edit/5

@@ -1,0 +1,41 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@model Showtimes.Models.ShowtimesEdit
+
+@{
+    ViewBag.Title = "Редактирование расписания";
+}
+
+@using (Html.BeginForm())
+{
+    <table>
+        <tr>
+            <td>@Html.LabelFor(_ => _.MovieTheaterId, "Кинотеатр")</td>
+            <td>@Html.DropDownListFor(_ => _.MovieTheaterId, ViewBag.MovieTheaters as IEnumerable<SelectListItem>)</td>
+        </tr>
+        <tr>
+            <td>@Html.LabelFor(_ => _.MovieId, "Фильм")</td>
+            <td>@Html.DropDownListFor(_ => _.MovieId, ViewBag.Movies as IEnumerable<SelectListItem>)</td>
+        </tr>
+        <tr>
+            <td>@Html.LabelFor(_ => _.Date, "Дата")</td>
+            <td>@Html.EditorFor(_ => _.Date)</td>
+        </tr>
+        <tr>
+            <td valign="top">@Html.LabelFor(_ => _.SessionTimesStr, "Сеансы")</td>
+            <td>@Html.TextAreaFor(_ => _.SessionTimesStr, 10, 20, null)</td>
+        </tr>
+        <tr>
+            <td colspan="2" align="center">
+                <button type="submit">Ok</button>
+                &nbsp;
+                <button type="button">@Html.ActionLink("Отмена", "Index", "Schedule", new { date = @Model.Date.ToString("yyyy-MM-dd") }, null)</button>
+                &nbsp;
+                <button type="button">@Html.ActionLink("Удалить", "Delete", "Schedule",
+                                     new { movieTheaterId = Model.MovieTheaterId, movieId = Model.MovieId, date = @Model.Date.ToString("yyyy-MM-dd") }, null)</button>
+            </td>
+        </tr>
+    </table>
+}

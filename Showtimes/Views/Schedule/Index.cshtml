@@ -1,0 +1,38 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@model Showtimes.Models.ShowtimesList
+
+@{ 
+    ViewBag.Title = "Расписание кинотеатров Гадюкино";
+}
+
+<div>
+    @using (Html.BeginForm("Index", "Schedule", FormMethod.Get))
+    {
+        @Html.LabelFor(_ => _.Date, "Дата")
+        <span>&nbsp;</span>@Html.EditorFor(_ => _.Date)
+        <span>&nbsp;</span><input type = "submit" value = "Показать" />
+        <span>&nbsp;</span><button type="button">@Html.ActionLink("Добавить", "Create", "Schedule")</button>
+    }
+</div>
+<br />
+<div>
+    <table>
+    @foreach (var t in Model.Showtimes.GroupBy(_ => _.Theater))
+    {
+        <tr><td colspan="3" width="500" style="border-bottom: 1px solid black">@t.Key.Name</td><td></td></tr>
+        
+        foreach (var m in t.GroupBy(_ => _.Movie))
+        {
+            <tr>
+                <td width="100">&nbsp;</td>
+                <td width="200">@m.Key.Title</td>
+                <td witdh="200" align="left">@string.Join(", ", m.Select(_ => _.SessionTime.ToString("t")))</td>
+                <td style="padding-left: 20px">@Html.ActionLink("Редактировать", "Edit", "Schedule")</td>
+            </tr>
+        }
+    }
+    </table>
+</div>

@@ -29,6 +29,16 @@ namespace Showtimes.Domain
         }
     }
 
+    public class ScheduleInitializer: CreateDatabaseIfNotExists<ShowtimesContext>
+    {
+        protected override void Seed(ShowtimesContext context)
+        {
+            base.Seed(context);
+
+            DatabaseSeeder.Seed(context);
+        }
+    }
+
     public static class DatabaseSeeder
     {
         public static void Seed(ShowtimesContext ctx)
@@ -64,7 +74,27 @@ namespace Showtimes.Domain
                 new MovieTheater { Name = "Кристалл" },
             });
 
-            ctx.SaveChangesAsync();
+            ctx.SaveChanges();
+
+            var date = new DateTime(2016, 6, 1);
+
+            foreach (var t in ctx.MovieTheatres)
+            {
+                foreach (var m in ctx.Movies.Take(5))
+                {
+                    for (int i = 1; i < 5; i++)
+                    {
+                        var d = date.AddDays(i);
+
+                        foreach (var s in new[] { d.AddHours(10), d.AddHours(12), d.AddHours(14) })
+                        {
+                            ctx.Showtimes.Add(new Showtimes(t.MovieTheaterId, m.MovieId, s));
+                        }
+                    }
+                }
+            }
+
+            ctx.SaveChanges();
         }
     }
 }

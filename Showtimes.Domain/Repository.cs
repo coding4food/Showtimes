@@ -87,6 +87,9 @@ namespace Showtimes.Domain
             var endDate = date.Date.AddDays(1);
 
             var showtimes = await this.DbSet
+                // ??? Maybe add argument to include other entities
+                .Include(_ => _.Movie)
+                .Include(_ => _.Theater)
                 .Where(s => s.SessionTime >= date.Date && s.SessionTime < endDate)
                 .ToArrayAsync();
 

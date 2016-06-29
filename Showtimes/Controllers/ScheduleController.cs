@@ -21,8 +21,6 @@ namespace Showtimes.Controllers
             var model = new ShowtimesList
             {
                 Date = d,
-                MovieTheatres = await unitOfWork.MovieTheatres.GetAllAsync(),
-                Movies = await unitOfWork.Movies.GetAllAsync(),
                 Showtimes = await unitOfWork.Showtimes.GetAllByDateAsync(d)
             };
 

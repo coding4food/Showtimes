@@ -30,7 +30,8 @@
                 <td width="100">&nbsp;</td>
                 <td width="200">@m.Key.Title</td>
                 <td witdh="200" align="left">@string.Join(", ", m.Select(_ => _.SessionTime.ToString("t")))</td>
-                <td style="padding-left: 20px">@Html.ActionLink("Редактировать", "Edit", "Schedule")</td>
+                <td style="padding-left: 20px">@Html.ActionLink("Редактировать", "Edit", "Schedule",
+                                              new { movieTheaterId = @t.Key.MovieTheaterId, movieId = @m.Key.MovieId, date = Model.Date.ToString("yyyy-MM-dd") }, null)</td>
             </tr>
         }
     }

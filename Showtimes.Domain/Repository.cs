@@ -21,6 +21,7 @@ namespace Showtimes.Domain
     {
         Task<IEnumerable<Showtimes>> GetAllByDateAsync(DateTime date);
         Task<IEnumerable<Showtimes>> GetAllByDateAsync(DateTime date, int movieTheaterId, int movieId);
+        Task DeleteAllByDate(int movieTheaterId, int movieId, DateTime date);
     }
 
     public interface IUnitOfWork
@@ -105,6 +106,14 @@ namespace Showtimes.Domain
                 .ToArrayAsync();
 
             return showtimes;
+        }
+
+        public async Task DeleteAllByDate(int movieTheaterId, int movieId, DateTime date)
+        {
+            foreach (var s in (await GetAllByDateAsync(date, movieTheaterId, movieId)))
+            {
+                Delete(s);
+            }
         }
     }
 

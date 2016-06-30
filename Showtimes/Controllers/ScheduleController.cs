@@ -58,7 +58,6 @@ namespace Showtimes.Controllers
         // GET: Schedule/Edit/5
         public async Task<ActionResult> Edit(int movieTheaterId, int movieId, DateTime? date)
         {
-            // TODO ??? add validation for movie and theater (should exist)
             var d = date ?? DateTime.Today;
 
             var showtimes = await unitOfWork.Showtimes.GetAllByDateAsync(d, movieTheaterId, movieId);

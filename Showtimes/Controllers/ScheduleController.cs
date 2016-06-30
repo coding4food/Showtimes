@@ -59,7 +59,6 @@ namespace Showtimes.Controllers
         public async Task<ActionResult> Edit(int movieTheaterId, int movieId, DateTime? date)
         {
             // TODO ??? add validation for movie and theater (should exist)
-
             var d = date ?? DateTime.Today;
 
             var showtimes = await unitOfWork.Showtimes.GetAllByDateAsync(d, movieTheaterId, movieId);
@@ -94,15 +93,52 @@ namespace Showtimes.Controllers
         // POST: Schedule/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "MovieTheaterId, MovieId, Date, SessionTimesStr")] ShowtimesEdit model)
+        public async Task<ActionResult> Edit([Bind(Include = "MovieTheaterId, MovieId, Date, SessionTimesStr")] ShowtimesEdit model)
         {
             try
             {
-                // TODO: Add update logic here
+                if (!string.IsNullOrWhiteSpace(model.SessionTimesStr))
+                {
+                    TimeSpan ts;
+
+                    var sessionTimesInput = model.SessionTimesStr
+                        .Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries)
+                        .Select(s => s.Trim());
+
+                    var sessionTimesAreInCorrectFormat = sessionTimesInput
+                        .All(s => TimeSpan.TryParseExact(s, new[] { "h\\:mm", "hh\\:mm" }, null, out ts));
+
+                    if (!sessionTimesAreInCorrectFormat)
+                    {
+                        ModelState.AddModelError("SessionTimesStr", "Session Times are invalid");
+                    }
+                    else if (sessionTimesInput.Distinct().Count() != sessionTimesInput.Count())
+                    {
+                        ModelState.AddModelError("SessionTimesStr", "Duplicate session times");
+                    }
+                }
+
                 if (ModelState.IsValid)
                 {
                     return RedirectToAction("Index", new { date = model.Date });
                 }
+
+                var theatres = await unitOfWork.MovieTheatres.GetAllAsync();
+                var movies = await unitOfWork.Movies.GetAllAsync();
+
+                ViewBag.Movies = new SelectList(
+                    items: movies,
+                    dataTextField: "Title",
+                    dataValueField: "MovieId",
+                    selectedValue: model.MovieId
+                );
+
+                ViewBag.MovieTheaters = new SelectList(
+                    items: theatres,
+                    dataTextField: "Name",
+                    dataValueField: "MovieTheaterId",
+                    selectedValue: model.MovieTheaterId
+                );
 
                 return View(model);
             }

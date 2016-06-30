@@ -13,6 +13,11 @@
     @Html.AntiForgeryToken()
     <table>
         <tr>
+            <td colspan="2">
+                @Html.ValidationSummary("Ошибка")
+            </td>
+        </tr>
+        <tr>
             <td>@Html.LabelFor(_ => _.MovieTheaterId, "Кинотеатр")</td>
             <td>@Html.DropDownListFor(_ => _.MovieTheaterId, ViewBag.MovieTheaters as IEnumerable<SelectListItem>)</td>
         </tr>

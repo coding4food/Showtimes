@@ -62,22 +62,9 @@ namespace Showtimes.Controllers
             var d = date ?? DateTime.Today;
 
             var showtimes = await unitOfWork.Showtimes.GetAllByDateAsync(d, movieTheaterId, movieId);
-            var theatres = await unitOfWork.MovieTheatres.GetAllAsync();
-            var movies = await unitOfWork.Movies.GetAllAsync();
 
-            ViewBag.Movies = new SelectList(
-                items: movies,
-                dataTextField: "Title",
-                dataValueField: "MovieId",
-                selectedValue: movieId
-            );
-
-            ViewBag.MovieTheaters = new SelectList(
-                items: theatres,
-                dataTextField: "Name",
-                dataValueField: "MovieTheaterId",
-                selectedValue: movieTheaterId
-            );
+            await FillMoviesSelectList(movieId);
+            await FillMovieTheatresSelectList(movieTheaterId);
 
             var model = new ShowtimesEdit
             {
@@ -123,7 +110,7 @@ namespace Showtimes.Controllers
                     ModelState.AddModelError("MovieTheaterId", "Movie theater doesn't exist");
                 }
 
-                if((await unitOfWork.Movies.FindAsync(model.MovieId)) == null)
+                if ((await unitOfWork.Movies.FindAsync(model.MovieId)) == null)
                 {
                     ModelState.AddModelError("MovieId", "Movie doesn't exist");
                 }
@@ -133,22 +120,8 @@ namespace Showtimes.Controllers
                     return RedirectToAction("Index", new { date = model.Date });
                 }
 
-                var theatres = await unitOfWork.MovieTheatres.GetAllAsync();
-                var movies = await unitOfWork.Movies.GetAllAsync();
-
-                ViewBag.Movies = new SelectList(
-                    items: movies,
-                    dataTextField: "Title",
-                    dataValueField: "MovieId",
-                    selectedValue: model.MovieId
-                );
-
-                ViewBag.MovieTheaters = new SelectList(
-                    items: theatres,
-                    dataTextField: "Name",
-                    dataValueField: "MovieTheaterId",
-                    selectedValue: model.MovieTheaterId
-                );
+                await FillMoviesSelectList(model.MovieId);
+                await FillMovieTheatresSelectList(model.MovieTheaterId);
 
                 return View(model);
             }
@@ -156,6 +129,30 @@ namespace Showtimes.Controllers
             {
                 return View();
             }
+        }
+
+        private async Task FillMovieTheatresSelectList(int movieTheaterId)
+        {
+            var theatres = await unitOfWork.MovieTheatres.GetAllAsync();
+
+            ViewBag.MovieTheaters = new SelectList(
+                items: theatres,
+                dataTextField: "Name",
+                dataValueField: "MovieTheaterId",
+                selectedValue: movieTheaterId
+            );
+        }
+
+        private async Task FillMoviesSelectList(int movieId)
+        {
+            var movies = await unitOfWork.Movies.GetAllAsync();
+
+            ViewBag.Movies = new SelectList(
+                items: movies,
+                dataTextField: "Title",
+                dataValueField: "MovieId",
+                selectedValue: movieId
+            );
         }
 
         // GET: Schedule/Delete/5

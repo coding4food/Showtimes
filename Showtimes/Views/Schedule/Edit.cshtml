@@ -33,8 +33,7 @@
                 &nbsp;
                 <button type="button">@Html.ActionLink("Отмена", "Index", "Schedule", new { date = @Model.Date.ToString("yyyy-MM-dd") }, null)</button>
                 &nbsp;
-                <button type="button">@Html.ActionLink("Удалить", "Delete", "Schedule",
-                                     new { movieTheaterId = Model.MovieTheaterId, movieId = Model.MovieId, date = @Model.Date.ToString("yyyy-MM-dd") }, null)</button>
+                <button type="submit" formmethod="post" formaction="@Url.Action("Delete", "Schedule", new { movieTheaterId = Model.MovieTheaterId, movieId = Model.MovieId, date = @Model.Date.ToString("yyyy-MM-dd") })">Удалить</button>
             </td>
         </tr>
     </table>

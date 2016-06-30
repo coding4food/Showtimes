@@ -32,34 +32,6 @@ namespace Showtimes.Controllers
             return View(model);
         }
 
-        // GET: Schedule/Details/5
-        public ActionResult Details(int id)
-        {
-            return View();
-        }
-
-        // GET: Schedule/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Schedule/Create
-        [HttpPost]
-        public ActionResult Create(FormCollection collection)
-        {
-            try
-            {
-                // TODO: Add insert logic here
-
-                return RedirectToAction("Index");
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
         // GET: Schedule/Edit/5
         public async Task<ActionResult> Edit(int movieTheaterId, int movieId, DateTime? date)
         {

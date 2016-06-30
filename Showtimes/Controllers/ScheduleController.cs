@@ -154,26 +154,23 @@ namespace Showtimes.Controllers
             );
         }
 
-        // GET: Schedule/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
         // POST: Schedule/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete([Bind(Include = "MovieTheaterId, MovieId, Date, SessionTimesStr")] ShowtimesEdit model)
+        public async Task<ActionResult> Delete(int movieTheaterId, int movieId, DateTime date)
         {
+            // Удаление будет очень простое: удаляем из БД сеансы для заданных кинотеатра, фильма и даты и редиректим на главную.
+            // В случае ошибки тоже редиректим, в списке будет видно, удалилось расписание или нет.
             try
             {
-                // TODO: Add delete logic here
+                await unitOfWork.Showtimes.DeleteAllByDate(movieTheaterId, movieId, date);
+                await unitOfWork.SaveAsync();
 
-                return RedirectToAction("Index", new { date = model.Date });
+                return RedirectToAction("Index", new { date = date });
             }
             catch
             {
-                return View();
+                return RedirectToAction("Index", new { date = date });
             }
         }
     }

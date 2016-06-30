@@ -37,9 +37,9 @@
             <td colspan="2" align="center">
                 <button type="submit">Ok</button>
                 &nbsp;
-                <button type="button">@Html.ActionLink("Отмена", "Index", "Schedule", new { date = @Model.Date.ToString("yyyy-MM-dd") }, null)</button>
+                <button type="button">@Html.ActionLink("Отмена", "Index", "Schedule", new { date = @Model.Date.ToString(Showtimes.Controllers.Constants.UrlDateFormat) }, null)</button>
                 &nbsp;
-                <button type="submit" formmethod="post" formaction="@Url.Action("Delete", "Schedule", new { movieTheaterId = Model.MovieTheaterId, movieId = Model.MovieId, date = @Model.Date.ToString("yyyy-MM-dd") })">Удалить</button>
+                <button type="submit" formmethod="post" formaction="@Url.Action("Delete", "Schedule", new { movieTheaterId = Model.MovieTheaterId, movieId = Model.MovieId, date = @Model.Date.ToString(Showtimes.Controllers.Constants.UrlDateFormat) })">Удалить</button>
             </td>
         </tr>
     </table>

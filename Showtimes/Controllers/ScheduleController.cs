@@ -9,6 +9,11 @@ using System.Threading.Tasks;
 
 namespace Showtimes.Controllers
 {
+    public static class Constants
+    {
+        public static readonly string UrlDateFormat = "yyyy-MM-dd";
+    }
+
     public class ScheduleController : Controller
     {
         private IUnitOfWork unitOfWork = new UnitOfWork();
@@ -116,7 +121,20 @@ namespace Showtimes.Controllers
 
                 if (ModelState.IsValid)
                 {
-                    return RedirectToAction("Index", new { date = model.Date });
+                    var sessionTimesInput = model.SessionTimesStr
+                        .Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries)
+                        .Select(s => s.Trim());
+
+                    var sessionTimes = sessionTimesInput
+                        .Select(t => model.Date.Date + TimeSpan.ParseExact(t, new[] { "h\\:mm", "hh\\:mm" }, null))
+                        .ToArray();
+
+                    var service = new ShowtimesSchedulingService(unitOfWork);
+
+                    await service.ScheduleShowtimes(model.MovieTheaterId, model.MovieId, sessionTimes);
+                    await unitOfWork.SaveAsync();
+
+                    return RedirectToAction("Index", new { date = model.Date.ToString(Constants.UrlDateFormat) });
                 }
 
                 await FillMoviesSelectList(model.MovieId);
@@ -166,11 +184,11 @@ namespace Showtimes.Controllers
                 await unitOfWork.Showtimes.DeleteAllByDate(movieTheaterId, movieId, date);
                 await unitOfWork.SaveAsync();
 
-                return RedirectToAction("Index", new { date = date });
+                return RedirectToAction("Index", new { date = date.ToString(Constants.UrlDateFormat) });
             }
             catch
             {
-                return RedirectToAction("Index", new { date = date });
+                return RedirectToAction("Index", new { date = date.ToString(Constants.UrlDateFormat) });
             }
         }
     }

@@ -10,6 +10,7 @@
 
 @using (Html.BeginForm())
 {
+    @Html.AntiForgeryToken()
     <table>
         <tr>
             <td>@Html.LabelFor(_ => _.MovieTheaterId, "Кинотеатр")</td>

@@ -85,7 +85,6 @@ namespace Showtimes.Controllers
                 MovieTheaterId = movieTheaterId,
                 MovieId = movieId,
                 Date = d,
-                SessionTimes = showtimes.Select(_ => _.SessionTime.TimeOfDay),
                 SessionTimesStr = string.Join("\n", showtimes.Select(_ => _.SessionTime.TimeOfDay.ToString("hh\\:mm")))
             };
 
@@ -94,13 +93,18 @@ namespace Showtimes.Controllers
 
         // POST: Schedule/Edit/5
         [HttpPost]
-        public ActionResult Edit(int id, FormCollection collection)
+        [ValidateAntiForgeryToken]
+        public ActionResult Edit([Bind(Include = "MovieTheaterId, MovieId, Date, SessionTimesStr")] ShowtimesEdit model)
         {
             try
             {
                 // TODO: Add update logic here
+                if (ModelState.IsValid)
+                {
+                    return RedirectToAction("Index", new { date = model.Date });
+                }
 
-                return RedirectToAction("Index");
+                return View(model);
             }
             catch
             {
@@ -116,13 +120,14 @@ namespace Showtimes.Controllers
 
         // POST: Schedule/Delete/5
         [HttpPost]
-        public ActionResult Delete(int id, FormCollection collection)
+        [ValidateAntiForgeryToken]
+        public ActionResult Delete([Bind(Include = "MovieTheaterId, MovieId, Date, SessionTimesStr")] ShowtimesEdit model)
         {
             try
             {
                 // TODO: Add delete logic here
 
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", new { date = model.Date });
             }
             catch
             {

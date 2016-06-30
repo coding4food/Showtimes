@@ -118,6 +118,16 @@ namespace Showtimes.Controllers
                     }
                 }
 
+                if ((await unitOfWork.MovieTheatres.FindAsync(model.MovieTheaterId)) == null)
+                {
+                    ModelState.AddModelError("MovieTheaterId", "Movie theater doesn't exist");
+                }
+
+                if((await unitOfWork.Movies.FindAsync(model.MovieId)) == null)
+                {
+                    ModelState.AddModelError("MovieId", "Movie doesn't exist");
+                }
+
                 if (ModelState.IsValid)
                 {
                     return RedirectToAction("Index", new { date = model.Date });
